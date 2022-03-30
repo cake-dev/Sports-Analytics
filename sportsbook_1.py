@@ -8,46 +8,48 @@ import math
 import pandas as pd
 from sportsipy.ncaab.teams import Team
 
+
 team1 = 'duke'  # 'north-carolina'
 team2 = 'kansas'  # 'villanova'
 
 
 # returns the values of predicted scores for each team, can be used for plusMinus and moneyLine (for predicted winner), as well as combined for overUnder bet
+# to predict score, use NCAA games
 def predictScore(t1, t2):
     pass
 
 
-# places an over_under bet
+# line determined by combined predicted score
 def overUnder(bet, choice, line):
     pass
 
 
-# places a money line bet
+# money line payouts determined by ratio of score difference times a constant
 def moneyLine(bet, choice, line):
     pass
 
 
-# line created from difference in predicted scores (i.e. 77-74 gives the predicted winner -3, loser +3), places bet in respect to line
+# line determined by difference in predicted scores (i.e. prediction for Duke vs Villanova is 75-72, Duke would have -3, Villa would get +3)
 def plusMinus(bet, choice, line):
     pass
 
 
-# makes a skilled prop 1 bet
+#  Will (top scoring player) score more than (average + 5)?
 def skilledProp1(bet, choice, line):
     pass
 
 
-# makes a skilled prop 2 bet
+# Will there be > (avg) turnovers?
 def skilledProp2(bet, choice, line):
     pass
 
 
-# makes an unskilled prop 1 bet
+# Will the game go to overtime? (chance determined by history of overtime games in NCAA final)
 def unskilledProp1(bet, choice, line):
     pass
 
 
-# makes an unskilled prop 2 bet
+# How many fouls will there be in the first half? (over/under avg fouls per game/2)
 def unskilledProp2(bet, choice, line):
     pass
 
