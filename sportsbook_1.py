@@ -33,7 +33,7 @@ def plusMinus(bet, choice, line):
     pass
 
 
-#  Will (top scoring player) score more than (average + 5)?
+#  Will (top scoring player) score more than (average + 1)?
 def skilledProp1(bet, choice, line):
     pass
 
@@ -44,6 +44,7 @@ def skilledProp2(bet, choice, line):
 
 
 # Will the game go to overtime? (chance determined by history of overtime games in NCAA final)
+# take each NCAA finals game (by date, using Boxscore), check if it went to overtime, create line based on ratio
 def unskilledProp1(bet, choice, line):
     pass
 
