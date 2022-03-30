@@ -4,7 +4,6 @@ File: sportsbook_1.py
 Date: 03/30/22
 """
 import math
-
 import pandas as pd
 from sportsipy.ncaab.teams import Team
 
