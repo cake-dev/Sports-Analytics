@@ -14,6 +14,9 @@ from sportsipy.ncaab.boxscore import Boxscore
 TEAM_1 = 'DUKE'
 TEAM_2 = 'KANSAS'
 
+# Change to true to fetch new data
+GET_NEW_DATA = False
+
 
 # returns the values of predicted scores for each team, can be used for plusMinus, moneyLine (for predicted winner), as well as combined for overUnder bet
 # use tournament games from current NCAA tourney + conf tourney
@@ -23,17 +26,18 @@ def predictScore(t1, t2):
     d1_avg_off = 103.8
     filename1 = 'Data/' + t1 + '_schedule.csv'
     filename2 = 'Data/' + t2 + '_schedule.csv'
-    # uncomment and run the following code to pull new data (if updated)
-    # team1 = Team(t1)
-    # team2 = Team(t2)
-    # schedule1 = team1.schedule
-    # schedule2 = team2.schedule
-    # sc1_df = schedule1.dataframe
-    # sc2_df = schedule2.dataframe
-    # sc1_df.to_csv(filename1)
-    # sc2_df.to_csv(filename2)
-    sc1_df = pd.read_csv(filename1)
-    sc2_df = pd.read_csv(filename2)
+    if GET_NEW_DATA:
+        team1 = Team(t1)
+        team2 = Team(t2)
+        schedule1 = team1.schedule
+        schedule2 = team2.schedule
+        sc1_df = schedule1.dataframe
+        sc2_df = schedule2.dataframe
+        sc1_df.to_csv(filename1)
+        sc2_df.to_csv(filename2)
+    if not GET_NEW_DATA:
+        sc1_df = pd.read_csv(filename1)
+        sc2_df = pd.read_csv(filename2)
     sc1_adj = sc1_df[sc1_df.type != 'Reg']
     sc2_adj = sc2_df[sc2_df.type != 'Reg']
     t1_game_dates = []
@@ -65,17 +69,17 @@ def predictScore(t1, t2):
         t2_game_dates.append(date)
     t1_game_dates.pop()
     t2_game_dates.pop()
-    # uncomment and run the following code to pull new data (if updated)
-    # for date in t1_game_dates:
-    #     filename = 'Data/' + str(date) + '_game_data.csv'
-    #     game = Boxscore(date)
-    #     game_df = game.dataframe
-    #     game_df.to_csv(filename)
-    # for date in t2_game_dates:
-    #     filename = 'Data/' + str(date) + '_game_data.csv'
-    #     game = Boxscore(date)
-    #     game_df = game.dataframe
-    #     game_df.to_csv(filename)
+    if GET_NEW_DATA:
+        for date in t1_game_dates:
+            filename = 'Data/' + str(date) + '_game_data.csv'
+            game = Boxscore(date)
+            game_df = game.dataframe
+            game_df.to_csv(filename)
+        for date in t2_game_dates:
+            filename = 'Data/' + str(date) + '_game_data.csv'
+            game = Boxscore(date)
+            game_df = game.dataframe
+            game_df.to_csv(filename)
     for date in t1_game_dates:
         filename = 'Data/' + str(date) + '_game_data.csv'
         game = pd.read_csv(filename)
@@ -117,7 +121,7 @@ def predictScore(t1, t2):
 
 def o_u_line(scores):
     line = int(scores[0] + scores[1])
-    return line + 1
+    return line + 0.5
 
 def m_line(pm_scores):
     m_lines = {
@@ -141,8 +145,8 @@ def p_m_line(t_scores):
         winner = TEAM_2
         loser = TEAM_1
     lines = {
-        winner: lo - hi,
-        loser: hi - lo
+        winner: (lo - hi) - 0.5,
+        loser: (hi - lo) + 0.5
     }
     return lines
 
@@ -242,12 +246,25 @@ def makeBet(b_type, bet, choice):
 def main():
     # 10% vig taken
     vig = 0.1
-    money = 1000
-    min_bet = 50
-    bet_types = ['plus_minus', 'money_line', 'over_under', 'skilled_prop_1', 'skilled_prop_2', 'unskilled_prop_1', 'unskilled_prop_2', 'exotic_prop_1', 'exotic_prop_2']
-    print('Choose a bet type (number)')
-    for i in range(len(bet_types)):
-        print('{}\t{}'.format(i, bet_types[i]))
+    print('Please select your bet:')
+    print('0 for plus and minus')
+    print('1 for money line')
+    print('2 for over/under')
+    print('3 for skilled prop 1')
+    print('4 for skilled prop 2')
+    print('5 for unskilled prop 1')
+    print('6 for unskilled prop 2')
+    print('7 for exotic prop 1')
+    print('8 for exotic prop 2')
+    user_bet_type = int(input())
+    print('Please enter amount (ex. $500 would be entered as 500)')
+    user_bet_amount = int(input())
+    print('Please enter the team:')
+    user_team = str(input())
+    # bet_types = ['plus_minus', 'money_line', 'over_under', 'skilled_prop_1', 'skilled_prop_2', 'unskilled_prop_1', 'unskilled_prop_2', 'exotic_prop_1', 'exotic_prop_2']
+    # print('Choose a bet type (number)')
+    # for i in range(len(bet_types)):
+    #     print('{}\t{}'.format(i, bet_types[i]))
     scores = predictScore(TEAM_1, TEAM_2)
     t_scores = {
         TEAM_1: int(scores[0]),
@@ -257,6 +274,7 @@ def main():
     # these are the plus_minus lines
     pmdf = pd.Series(plusminus)
     print(pmdf.to_string())
+    m_line(plusminus)
 
 
 if __name__ == '__main__':
