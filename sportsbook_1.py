@@ -202,7 +202,7 @@ def overUnder(bet, choice, line):
 
 # money line payouts determined by ratio of score difference times a constant
 def moneyLine(bet, choice, line):
-    # jake
+    # jakes
     pass
 
 
