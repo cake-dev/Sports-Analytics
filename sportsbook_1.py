@@ -8,7 +8,6 @@ import pandas as pd
 from sportsipy.ncaab.teams import Team
 from sportsipy.ncaab.boxscore import Boxscore
 
-
 # TEAM_1 = 'NORTH-CAROLINA'
 # TEAM_2 = 'VILLANOVA'
 TEAM_1 = 'DUKE'
@@ -16,6 +15,39 @@ TEAM_2 = 'KANSAS'
 
 # Change to true to fetch new data
 GET_NEW_DATA = False
+GET_MODS = False
+
+if GET_MODS:
+    TEAM_MODS = pd.DataFrame(
+        {
+            'TEAM': ['DUKE', 'KANSAS', 'NORTH-CAROLINA', 'VILLANOVA'],
+            'MOD': [Team('DUKE').strength_of_schedule, Team('KANSAS').strength_of_schedule,
+                    Team('NORTH-CAROLINA').strength_of_schedule, Team('VILLANOVA').strength_of_schedule, ]
+        }
+    )
+
+    TEAM_MODS.to_csv('Data/team_mods.csv')
+
+# use this DF to add betting info to write to CSV later
+BETTING_INFO = pd.DataFrame(
+    {
+        "Bet Type": [
+            "plus and minus",
+            "money line",
+            "over/under",
+            "skilled prop 1",
+            "skilled prop 2",
+            "unskilled prop 1",
+            "unskilled prop 2",
+            "exotic prop 1",
+            "exotic prop 2"
+        ],
+        "Bet Amount": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "Choice": [TEAM_1, TEAM_1, TEAM_1, TEAM_1, TEAM_1, TEAM_1, TEAM_1, TEAM_1, TEAM_1],
+        "Possible Winnings": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "Description": ["FIXME", "FIXME", "FIXME", "FIXME", "FIXME", "FIXME", "FIXME", "FIXME", "FIXME"]
+    }
+)
 
 
 # returns the values of predicted scores for each team, can be used for plusMinus, moneyLine (for predicted winner), as well as combined for overUnder bet
@@ -121,19 +153,30 @@ def predictScore(t1, t2):
 
 def o_u_line(scores):
     line = int(scores[0] + scores[1])
-    return line + 0.5
+    return line - 0.5
+
 
 def m_line(pm_scores):
+    mods = pd.read_csv('Data/team_mods.csv')
+    t1_mod = 1  # read csv to get mods for team 1
+    t2_mod = 2  # read csv to get mods for team 2
+    if t1_mod > t2_mod:
+        hi = t1_mod
+        lo = t2_mod
+        w_mod = t1_mod - t2_mod
+    else:
+        hi = t2_mod
+        lo = t1_mod
+        w_mod = t2_mod - t1_mod
     m_lines = {
         TEAM_1: pm_scores[TEAM_1],
         TEAM_2: pm_scores[TEAM_2]
     }
+    ml = pd.Series(m_lines).to_string()
+    return ml
+
 
 def p_m_line(t_scores):
-    hi = 0
-    lo = 0
-    winner = ''
-    loser = ''
     if t_scores.get(TEAM_1) > t_scores.get(TEAM_2):
         hi = t_scores.get(TEAM_1)
         lo = t_scores.get(TEAM_2)
@@ -164,7 +207,7 @@ def moneyLine(bet, choice, line):
 
 
 # line determined by difference in predicted scores (i.e. prediction for Duke vs Villanova is 75-72, Duke would have -3, Villa would get +3)
-def plusMinus(bet, choice, line):
+def plusMinus(bet, choice, lines):
     # jake
     pass
 
@@ -209,18 +252,18 @@ def displayData():
     pass
 
 
-def makeBet(b_type, bet, choice):
-    line = 0
+def makeBet(b_type, bet, choice, scores):
     match b_type:
         case 0:
             # set line here
-            plusMinus(bet, choice, line)
+            lines = scores
+            plusMinus(bet, choice, lines)
         case 1:
             # set line here
             moneyLine(bet, choice, line)
         case 2:
-            # set line here
-            overUnder(bet, choice, line)
+            lines = o_u_line(scores)
+            overUnder(bet, choice, lines)
         case 3:
             # set line here
             skilledProp1(bet, choice, line)
@@ -246,35 +289,49 @@ def makeBet(b_type, bet, choice):
 def main():
     # 10% vig taken
     vig = 0.1
-    print('Please select your bet:')
-    print('0 for plus and minus')
-    print('1 for money line')
-    print('2 for over/under')
-    print('3 for skilled prop 1')
-    print('4 for skilled prop 2')
-    print('5 for unskilled prop 1')
-    print('6 for unskilled prop 2')
-    print('7 for exotic prop 1')
-    print('8 for exotic prop 2')
-    user_bet_type = int(input())
-    print('Please enter amount (ex. $500 would be entered as 500)')
-    user_bet_amount = int(input())
-    print('Please enter the team:')
-    user_team = str(input())
-    # bet_types = ['plus_minus', 'money_line', 'over_under', 'skilled_prop_1', 'skilled_prop_2', 'unskilled_prop_1', 'unskilled_prop_2', 'exotic_prop_1', 'exotic_prop_2']
-    # print('Choose a bet type (number)')
-    # for i in range(len(bet_types)):
-    #     print('{}\t{}'.format(i, bet_types[i]))
+    # these are the plus_minus lines
     scores = predictScore(TEAM_1, TEAM_2)
     t_scores = {
         TEAM_1: int(scores[0]),
         TEAM_2: int(scores[1])
     }
-    plusminus = p_m_line(t_scores)
-    # these are the plus_minus lines
-    pmdf = pd.Series(plusminus)
-    print(pmdf.to_string())
-    m_line(plusminus)
+    plus_minus = pd.Series(p_m_line(t_scores)).to_string()
+    over_under = "under {}".format(o_u_line(scores))
+    money_line = m_line(p_m_line(t_scores))
+    display_df = pd.DataFrame(
+        {
+            "Bet Type": [
+                "plus and minus",
+                "money line",
+                "over/under",
+                "skilled prop 1",
+                "skilled prop 2",
+                "unskilled prop 1",
+                "unskilled prop 2",
+                "exotic prop 1",
+                "exotic prop 2",
+            ],
+            "Details": [
+                plus_minus,
+                money_line,
+                over_under,
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+            ]
+        }
+    )
+    print(display_df)
+    print('Please select your bet (#):')
+    user_bet_type = int(input())
+    print('Please enter amount (ex. $500 would be entered as 500)')
+    user_bet_amount = int(input())
+    print('Please enter the team: {} or {}'.format(TEAM_1, TEAM_2))
+    user_team = str(input())
+    makeBet(user_bet_type, user_bet_amount, user_team, plus_minus)
 
 
 if __name__ == '__main__':
