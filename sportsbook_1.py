@@ -27,6 +27,13 @@ if GET_MODS:
     )
 
     TEAM_MODS.to_csv('Data/team_mods.csv')
+else:
+    TEAM_MODS = {
+        'DUKE': 7.04,
+        'KANSAS': 10.98,
+        'NORTH-CAROLINA': 8.25,
+        'VILLANOVA': 10.01
+    }
 
 # use this DF to add betting info to write to CSV later
 BETTING_INFO = pd.DataFrame(
@@ -157,20 +164,22 @@ def o_u_line(scores):
 
 
 def m_line(pm_scores):
-    mods = pd.read_csv('Data/team_mods.csv')
-    t1_mod = 1  # read csv to get mods for team 1
-    t2_mod = 2  # read csv to get mods for team 2
+    t1_mod = TEAM_MODS[TEAM_1]
+    t2_mod = TEAM_MODS[TEAM_2]
+    if pm_scores.get(TEAM_1) > pm_scores.get(TEAM_2):
+        winner = TEAM_1
+        loser = TEAM_2
+    else:
+        winner = TEAM_2
+        loser = TEAM_1
     if t1_mod > t2_mod:
-        hi = t1_mod
-        lo = t2_mod
         w_mod = t1_mod - t2_mod
     else:
-        hi = t2_mod
-        lo = t1_mod
         w_mod = t2_mod - t1_mod
+
     m_lines = {
-        TEAM_1: pm_scores[TEAM_1],
-        TEAM_2: pm_scores[TEAM_2]
+        winner: int(pm_scores[winner] * w_mod * 10),
+        loser: int(pm_scores[loser] * w_mod * 10)
     }
     ml = pd.Series(m_lines).to_string()
     return ml
@@ -195,55 +204,55 @@ def p_m_line(t_scores):
 
 
 # line determined by combined predicted score
-def overUnder(bet, choice, line):
+def overUnderBet(bet, choice, line):
     # jake
     pass
 
 
 # money line payouts determined by ratio of score difference times a constant
-def moneyLine(bet, choice, line):
+def moneyLineBet(bet, choice, line):
     # jakes
     pass
 
 
 # line determined by difference in predicted scores (i.e. prediction for Duke vs Villanova is 75-72, Duke would have -3, Villa would get +3)
-def plusMinus(bet, choice, lines):
+def plusMinusBet(bet, choice, lines):
     # jake
     pass
 
 
 #  Will (top scoring player) score more than (average + 1)?
-def skilledProp1(bet, choice, line):
+def skilledProp1Bet(bet, choice, line):
     # nick
     pass
 
 
 # Will there be > (avg) turnovers?
-def skilledProp2(bet, choice, line):
+def skilledProp2Bet(bet, choice, line):
     # nick
     pass
 
 
 # Will the game go to overtime? (chance determined by history of overtime games in NCAA tourney)
 # take each NCAA finals game (by date, using Boxscore), check if it went to overtime, create line based on ratio
-def unskilledProp1(bet, choice, line):
+def unskilledProp1Bet(bet, choice, line):
     # myles
     pass
 
 
 # How many fouls will there be in the first half? (over/under avg fouls per game/2)
-def unskilledProp2(bet, choice, line):
+def unskilledProp2Bet(bet, choice, line):
     # myles
     pass
 
 
 # makes an exotic prop 1 bet
-def exoticProp1(bet, choice, line):
+def exoticProp1Bet(bet, choice, line):
     pass
 
 
 # makes an exotic prop 1 bet
-def exoticProp2(bet, choice, line):
+def exoticProp2Bet(bet, choice, line):
     pass
 
 
@@ -257,31 +266,31 @@ def makeBet(b_type, bet, choice, scores):
         case 0:
             # set line here
             lines = scores
-            plusMinus(bet, choice, lines)
+            plusMinusBet(bet, choice, lines)
         case 1:
             # set line here
-            moneyLine(bet, choice, line)
+            moneyLineBet(bet, choice, line)
         case 2:
             lines = o_u_line(scores)
-            overUnder(bet, choice, lines)
+            overUnderBet(bet, choice, lines)
         case 3:
             # set line here
-            skilledProp1(bet, choice, line)
+            skilledProp1Bet(bet, choice, line)
         case 4:
             # set line here
-            skilledProp2(bet, choice, line)
+            skilledProp2Bet(bet, choice, line)
         case 5:
             # set line here
-            unskilledProp1(bet, choice, line)
+            unskilledProp1Bet(bet, choice, line)
         case 6:
             # set line here
-            unskilledProp2(bet, choice, line)
+            unskilledProp2Bet(bet, choice, line)
         case 7:
             # set line here
-            exoticProp1(bet, choice, line)
+            exoticProp1Bet(bet, choice, line)
         case 8:
             # set line here
-            exoticProp2(bet, choice, line)
+            exoticProp2Bet(bet, choice, line)
         case _:
             print("No bet selected")
 
@@ -295,7 +304,7 @@ def main():
         TEAM_1: int(scores[0]),
         TEAM_2: int(scores[1])
     }
-    plus_minus = pd.Series(p_m_line(t_scores)).to_string()
+    plus_minus = pd.Series(p_m_line(t_scores)).to_string().strip()
     over_under = "under {}".format(o_u_line(scores))
     money_line = m_line(p_m_line(t_scores))
     display_df = pd.DataFrame(
