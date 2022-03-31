@@ -3,29 +3,17 @@ Name: Jake Bova
 File: sportsbook_1.py
 Date: 03/30/22
 """
-import math
 import numpy
 import pandas as pd
 from sportsipy.ncaab.teams import Team
 from sportsipy.ncaab.boxscore import Boxscore
 
 
-TEAM_1 = 'DUKE'  # 'NORTH-CAROLINA'
-TEAM_2 = 'KANSAS'  # 'VILLANOVA'
+# TEAM_1 = 'NORTH-CAROLINA'
+# TEAM_2 = 'VILLANOVA'
+TEAM_1 = 'DUKE'
+TEAM_2 = 'KANSAS'
 
-
-def teamRating(srs, sos, efg, off, wp, g):
-    """
-    teamRating uses several factors to calculate a team 'rating'.  A higher rating indicates a better team / a team that has played stronger opponents.
-    The difference in team ratings is used to add additional score to the better team in the predictScore calculation.
-    """
-    # take log base 2 of srs and add to score (to prevent too large of rating  & add negative value for low ( < 1) SRS teams)
-    if srs > 0:
-        mod_srs = math.log(srs, 2)
-    else:
-        mod_srs = -10
-    rating = mod_srs + sos * 2 + (efg * off) + (wp * g)
-    return rating
 
 # returns the values of predicted scores for each team, can be used for plusMinus, moneyLine (for predicted winner), as well as combined for overUnder bet
 # use tournament games from current NCAA tourney + conf tourney
@@ -33,12 +21,19 @@ def predictScore(t1, t2):
     # jake
     d1_avg_poss = 67.3
     d1_avg_off = 103.8
-    team1 = Team(t1)
-    team2 = Team(t2)
-    schedule1 = team1.schedule
-    schedule2 = team2.schedule
-    sc1_df = schedule1.dataframe
-    sc2_df = schedule2.dataframe
+    filename1 = 'Data/' + t1 + '_schedule.csv'
+    filename2 = 'Data/' + t2 + '_schedule.csv'
+    # uncomment and run the following code to pull new data (if updated)
+    # team1 = Team(t1)
+    # team2 = Team(t2)
+    # schedule1 = team1.schedule
+    # schedule2 = team2.schedule
+    # sc1_df = schedule1.dataframe
+    # sc2_df = schedule2.dataframe
+    # sc1_df.to_csv(filename1)
+    # sc2_df.to_csv(filename2)
+    sc1_df = pd.read_csv(filename1)
+    sc2_df = pd.read_csv(filename2)
     sc1_adj = sc1_df[sc1_df.type != 'Reg']
     sc2_adj = sc2_df[sc2_df.type != 'Reg']
     t1_game_dates = []
@@ -68,16 +63,32 @@ def predictScore(t1, t2):
         t1_game_dates.append(date)
     for date in sc2_adj.boxscore_index:
         t2_game_dates.append(date)
+    t1_game_dates.pop()
+    t2_game_dates.pop()
+    # uncomment and run the following code to pull new data (if updated)
+    # for date in t1_game_dates:
+    #     filename = 'Data/' + str(date) + '_game_data.csv'
+    #     game = Boxscore(date)
+    #     game_df = game.dataframe
+    #     game_df.to_csv(filename)
+    # for date in t2_game_dates:
+    #     filename = 'Data/' + str(date) + '_game_data.csv'
+    #     game = Boxscore(date)
+    #     game_df = game.dataframe
+    #     game_df.to_csv(filename)
     for date in t1_game_dates:
-        game = Boxscore(date)
+        filename = 'Data/' + str(date) + '_game_data.csv'
+        game = pd.read_csv(filename)
         t1_stats['pace'].append(game.pace)
         t1_stats['off_eff'].append(game.home_offensive_rating)
         t1_stats['def_eff'].append(game.home_defensive_rating)
+    # review this after the next final four games are played (to see if game stats are updated and not None type)
     t1_stats['pace'].pop()
     t1_stats['off_eff'].pop()
     t1_stats['def_eff'].pop()
     for date in t2_game_dates:
-        game = Boxscore(date)
+        filename = 'Data/' + str(date) + '_game_data.csv'
+        game = pd.read_csv(filename)
         t2_stats['pace'].append(game.pace)
         t2_stats['off_eff'].append(game.home_offensive_rating)
         t2_stats['def_eff'].append(game.home_defensive_rating)
@@ -108,9 +119,11 @@ def o_u_line(scores):
     line = int(scores[0] + scores[1])
     return line + 1
 
-def m_line(scores):
-    m_lines = []
-    s_diff = abs(scores[0] - scores[1])
+def m_line(pm_scores):
+    m_lines = {
+        TEAM_1: pm_scores[TEAM_1],
+        TEAM_2: pm_scores[TEAM_2]
+    }
 
 def p_m_line(t_scores):
     hi = 0
@@ -241,8 +254,9 @@ def main():
         TEAM_2: int(scores[1])
     }
     plusminus = p_m_line(t_scores)
-    pmdf = pd.DataFrame.from_dict(plusminus)
-    print(pmdf)
+    # these are the plus_minus lines
+    pmdf = pd.Series(plusminus)
+    print(pmdf.to_string())
 
 
 if __name__ == '__main__':
