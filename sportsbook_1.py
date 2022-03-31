@@ -14,8 +14,20 @@ TEAM_1 = 'DUKE'  # 'NORTH-CAROLINA'
 TEAM_2 = 'KANSAS'  # 'VILLANOVA'
 
 
-# returns the values of predicted scores for each team, can be used for plusMinus and moneyLine (for predicted winner), as well as combined for overUnder bet
-# to predict score, use NCAA games
+def teamRating(srs, sos, efg, off, wp, g):
+    """
+    teamRating uses several factors to calculate a team 'rating'.  A higher rating indicates a better team / a team that has played stronger opponents.
+    The difference in team ratings is used to add additional score to the better team in the predictScore calculation.
+    """
+    # take log base 2 of srs and add to score (to prevent too large of rating  & add negative value for low ( < 1) SRS teams)
+    if srs > 0:
+        mod_srs = math.log(srs, 2)
+    else:
+        mod_srs = -10
+    rating = mod_srs + sos * 2 + (efg * off) + (wp * g)
+    return rating
+
+# returns the values of predicted scores for each team, can be used for plusMinus, moneyLine (for predicted winner), as well as combined for overUnder bet
 # use tournament games from current NCAA tourney + conf tourney
 def predictScore(t1, t2):
     # jake
@@ -92,6 +104,36 @@ def predictScore(t1, t2):
     return [t1_score, t2_score]
 
 
+def o_u_line(scores):
+    line = int(scores[0] + scores[1])
+    return line + 1
+
+def m_line(scores):
+    m_lines = []
+    s_diff = abs(scores[0] - scores[1])
+
+def p_m_line(t_scores):
+    hi = 0
+    lo = 0
+    winner = ''
+    loser = ''
+    if t_scores.get(TEAM_1) > t_scores.get(TEAM_2):
+        hi = t_scores.get(TEAM_1)
+        lo = t_scores.get(TEAM_2)
+        winner = TEAM_1
+        loser = TEAM_2
+    else:
+        hi = t_scores.get(TEAM_2)
+        lo = t_scores.get(TEAM_1)
+        winner = TEAM_2
+        loser = TEAM_1
+    lines = {
+        winner: lo - hi,
+        loser: hi - lo
+    }
+    return lines
+
+
 # line determined by combined predicted score
 def overUnder(bet, choice, line):
     # jake
@@ -122,7 +164,7 @@ def skilledProp2(bet, choice, line):
     pass
 
 
-# Will the game go to overtime? (chance determined by history of overtime games in NCAA final)
+# Will the game go to overtime? (chance determined by history of overtime games in NCAA tourney)
 # take each NCAA finals game (by date, using Boxscore), check if it went to overtime, create line based on ratio
 def unskilledProp1(bet, choice, line):
     # myles
@@ -194,8 +236,13 @@ def main():
     for i in range(len(bet_types)):
         print('{}\t{}'.format(i, bet_types[i]))
     scores = predictScore(TEAM_1, TEAM_2)
-    for score in scores:
-        print(score)
+    t_scores = {
+        TEAM_1: int(scores[0]),
+        TEAM_2: int(scores[1])
+    }
+    plusminus = p_m_line(t_scores)
+    pmdf = pd.DataFrame.from_dict(plusminus)
+    print(pmdf)
 
 
 if __name__ == '__main__':
