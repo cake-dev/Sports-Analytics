@@ -246,38 +246,38 @@ def plusMinusBet(bet, choice):
 
 
 #  Will (top scoring player) score more than (average + 1)?
-def skilledProp1Bet(bet, choice, line):
+def skilledProp1Bet(bet, choice):
     # nick
     pass
 
 
 # Will there be > (avg) turnovers?
-def skilledProp2Bet(bet, choice, line):
+def skilledProp2Bet(bet, choice):
     # nick
     pass
 
 
 # Will the game go to overtime? (chance determined by history of overtime games in NCAA tourney)
 # take each NCAA finals game (by date, using Boxscore), check if it went to overtime, create line based on ratio
-def unskilledProp1Bet(bet, choice, line):
+def unskilledProp1Bet(bet, choice):
     # myles
     pass
 
 
 # How many fouls will there be in the first half? (over/under avg fouls per game/2)
-def unskilledProp2Bet(bet, choice, line):
+def unskilledProp2Bet(bet, choice):
     # myles
     pass
 
 
 # makes an exotic prop 1 bet
 # which team will score first?
-def exoticProp1Bet(bet, choice, line):
+def exoticProp1Bet(bet, choice):
     pass
 
 
 # makes an exotic prop 1 bet
-def exoticProp2Bet(bet, choice, line):
+def exoticProp2Bet(bet, choice):
     pass
 
 
