@@ -15,6 +15,10 @@ pd.set_option("display.max_rows", None, "display.max_columns", None)
 TEAM_1 = 'DUKE'
 TEAM_2 = 'KANSAS'
 
+# change these to the winning teams after the game, will be used to check against user choice to give out winnings
+WINNER = TEAM_1
+LOSER = TEAM_2
+
 # Change to true to fetch new data
 GET_NEW_DATA = False
 GET_MODS = False
@@ -196,8 +200,8 @@ def m_line(pm_scores):
         w_mod = t2_mod - t1_mod
 
     m_lines = {
-        winner: int(pm_scores[winner] * w_mod * 10),
-        loser: int(pm_scores[loser] * w_mod * 10)
+        winner: int(pm_scores[winner] * w_mod * 5),
+        loser: int(pm_scores[loser] * w_mod * 5)
     }
     ml = pd.Series(m_lines).to_string()
     BETTING_INFO.at[1, 'Description'] = ml
@@ -223,19 +227,19 @@ def p_m_line(t_scores):
     return lines
 
 
-# line determined by combined predicted score
+# make over under bet
 def overUnderBet(bet, choice):
     # jake
     pass
 
 
-# money line payouts determined by ratio of score difference times a constant
+# make money line bet
 def moneyLineBet(bet, choice):
     # jake
     pass
 
 
-# line determined by difference in predicted scores (i.e. prediction for Duke vs Villanova is 75-72, Duke would have -3, Villa would get +3)
+# make a plus minus bet
 def plusMinusBet(bet, choice):
     # jake
     pass
@@ -267,6 +271,7 @@ def unskilledProp2Bet(bet, choice, line):
 
 
 # makes an exotic prop 1 bet
+# which team will score first?
 def exoticProp1Bet(bet, choice, line):
     pass
 
@@ -282,32 +287,33 @@ def displayData():
     pass
 
 
-def makeBet(b_type, bet, choice, scores):
+def makeBet(b_type, bet, choice):
     match b_type:
         case 0:
             updateBettingInfo(b_type, bet, choice)
+            plusMinusBet(bet, choice)
         case 1:
             updateBettingInfo(b_type, bet, choice)
         case 2:
             updateBettingInfo(b_type, bet, choice)
         case 3:
             # set line here
-            skilledProp1Bet(bet, choice, line)
+            skilledProp1Bet(bet, choice)
         case 4:
             # set line here
-            skilledProp2Bet(bet, choice, line)
+            skilledProp2Bet(bet, choice)
         case 5:
             # set line here
-            unskilledProp1Bet(bet, choice, line)
+            unskilledProp1Bet(bet, choice)
         case 6:
             # set line here
-            unskilledProp2Bet(bet, choice, line)
+            unskilledProp2Bet(bet, choice)
         case 7:
             # set line here
-            exoticProp1Bet(bet, choice, line)
+            exoticProp1Bet(bet, choice)
         case 8:
             # set line here
-            exoticProp2Bet(bet, choice, line)
+            exoticProp2Bet(bet, choice)
         case _:
             print("No bet selected")
 
