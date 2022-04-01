@@ -65,15 +65,6 @@ BETTING_INFO = pd.DataFrame(
 
 
 def updateBettingInfo(bet_type, bet, choice):
-    b_types = ["plus and minus",
-               "money line",
-               "over/under",
-               "skilled prop 1",
-               "skilled prop 2",
-               "unskilled prop 1",
-               "unskilled prop 2",
-               "exotic prop 1",
-               "exotic prop 2"]
     BETTING_INFO.at[bet_type, 'Bet Amount'] = bet
     BETTING_INFO.at[bet_type, 'Choice'] = choice
 
@@ -200,7 +191,7 @@ def m_line(pm_scores):
         w_mod = t2_mod - t1_mod
 
     m_lines = {
-        winner: int(pm_scores[winner] * w_mod * 5),
+        winner: int(pm_scores[winner] * w_mod * 3),
         loser: int(pm_scores[loser] * w_mod * 5)
     }
     ml = pd.Series(m_lines).to_string()
@@ -236,6 +227,7 @@ def overUnderBet(bet, choice):
 # make money line bet
 def moneyLineBet(bet, choice):
     # jake
+    
     pass
 
 
@@ -277,6 +269,7 @@ def exoticProp1Bet(bet, choice):
 
 
 # makes an exotic prop 1 bet
+# will the final combined score be odd or even?
 def exoticProp2Bet(bet, choice):
     pass
 
@@ -369,7 +362,7 @@ def main():
         else:
             print('Please enter the team: {} or {}'.format(TEAM_1, TEAM_2))
             user_choice = str(input())
-        makeBet(user_bet_type, user_bet_amount, user_choice, plus_minus)
+        makeBet(user_bet_type, user_bet_amount, user_choice)
         print(BETTING_INFO)
 
 
