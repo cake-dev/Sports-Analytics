@@ -8,6 +8,8 @@ import pandas as pd
 from sportsipy.ncaab.teams import Team
 from sportsipy.ncaab.boxscore import Boxscore
 
+pd.set_option("display.max_rows", None, "display.max_columns", None)
+
 # TEAM_1 = 'NORTH-CAROLINA'
 # TEAM_2 = 'VILLANOVA'
 TEAM_1 = 'DUKE'
@@ -17,6 +19,7 @@ TEAM_2 = 'KANSAS'
 GET_NEW_DATA = False
 GET_MODS = False
 
+# TEAM_MODS used to adjust moneyline bet
 if GET_MODS:
     TEAM_MODS = pd.DataFrame(
         {
@@ -55,6 +58,20 @@ BETTING_INFO = pd.DataFrame(
         "Description": ["FIXME", "FIXME", "FIXME", "FIXME", "FIXME", "FIXME", "FIXME", "FIXME", "FIXME"]
     }
 )
+
+
+def updateBettingInfo(bet_type, bet, choice):
+    b_types = ["plus and minus",
+               "money line",
+               "over/under",
+               "skilled prop 1",
+               "skilled prop 2",
+               "unskilled prop 1",
+               "unskilled prop 2",
+               "exotic prop 1",
+               "exotic prop 2"]
+    BETTING_INFO.at[bet_type, 'Bet Amount'] = bet
+    BETTING_INFO.at[bet_type, 'Choice'] = choice
 
 
 # returns the values of predicted scores for each team, can be used for plusMinus, moneyLine (for predicted winner), as well as combined for overUnder bet
@@ -159,8 +176,9 @@ def predictScore(t1, t2):
 
 
 def o_u_line(scores):
-    line = int(scores[0] + scores[1])
-    return line - 0.5
+    line = int(scores[0] + scores[1]) - 0.5
+    BETTING_INFO.at[2, 'Description'] = line
+    return line
 
 
 def m_line(pm_scores):
@@ -182,6 +200,7 @@ def m_line(pm_scores):
         loser: int(pm_scores[loser] * w_mod * 10)
     }
     ml = pd.Series(m_lines).to_string()
+    BETTING_INFO.at[1, 'Description'] = ml
     return ml
 
 
@@ -200,23 +219,24 @@ def p_m_line(t_scores):
         winner: (lo - hi) - 0.5,
         loser: (hi - lo) + 0.5
     }
+    BETTING_INFO.at[0, ' Description'] = pd.Series(lines).to_string().strip()
     return lines
 
 
 # line determined by combined predicted score
-def overUnderBet(bet, choice, line):
+def overUnderBet(bet, choice):
     # jake
     pass
 
 
 # money line payouts determined by ratio of score difference times a constant
-def moneyLineBet(bet, choice, line):
-    # jakes
+def moneyLineBet(bet, choice):
+    # jake
     pass
 
 
 # line determined by difference in predicted scores (i.e. prediction for Duke vs Villanova is 75-72, Duke would have -3, Villa would get +3)
-def plusMinusBet(bet, choice, lines):
+def plusMinusBet(bet, choice):
     # jake
     pass
 
@@ -257,6 +277,7 @@ def exoticProp2Bet(bet, choice, line):
 
 
 # outputs the betting info in sportsbook format
+# use the BETTING_INFO df to do this
 def displayData():
     pass
 
@@ -264,15 +285,11 @@ def displayData():
 def makeBet(b_type, bet, choice, scores):
     match b_type:
         case 0:
-            # set line here
-            lines = scores
-            plusMinusBet(bet, choice, lines)
+            updateBettingInfo(b_type, bet, choice)
         case 1:
-            # set line here
-            moneyLineBet(bet, choice, line)
+            updateBettingInfo(b_type, bet, choice)
         case 2:
-            lines = o_u_line(scores)
-            overUnderBet(bet, choice, lines)
+            updateBettingInfo(b_type, bet, choice)
         case 3:
             # set line here
             skilledProp1Bet(bet, choice, line)
@@ -333,14 +350,21 @@ def main():
             ]
         }
     )
-    print(display_df)
-    print('Please select your bet (#):')
-    user_bet_type = int(input())
-    print('Please enter amount (ex. $500 would be entered as 500)')
-    user_bet_amount = int(input())
-    print('Please enter the team: {} or {}'.format(TEAM_1, TEAM_2))
-    user_team = str(input())
-    makeBet(user_bet_type, user_bet_amount, user_team, plus_minus)
+    user_bet_type = 99
+    while user_bet_type != -1:
+        print(display_df)
+        print('Please select your bet (#) (-1 to quit):')
+        user_bet_type = int(input())
+        print('Please enter amount (ex. $500 would be entered as 500)')
+        user_bet_amount = int(input())
+        if user_bet_type == 2:
+            print("Over or under?")
+            user_choice = str(input())
+        else:
+            print('Please enter the team: {} or {}'.format(TEAM_1, TEAM_2))
+            user_choice = str(input())
+        makeBet(user_bet_type, user_bet_amount, user_choice, plus_minus)
+        print(BETTING_INFO)
 
 
 if __name__ == '__main__':
