@@ -195,7 +195,7 @@ def m_line(pm_scores):
         loser: int(pm_scores[loser] * w_mod * 5)
     }
     ml = pd.Series(m_lines).to_string()
-    BETTING_INFO.at[1, 'Description'] = ml
+    BETTING_INFO.at[1, 'Description'] = m_lines
     return ml
 
 
@@ -214,7 +214,7 @@ def p_m_line(t_scores):
         winner: (lo - hi) - 0.5,
         loser: (hi - lo) + 0.5
     }
-    BETTING_INFO.at[0, ' Description'] = pd.Series(lines).to_string().strip()
+    BETTING_INFO.at[0, 'Description'] = lines
     return lines
 
 
@@ -225,9 +225,10 @@ def overUnderBet(bet, choice):
 
 
 # make money line bet
-def moneyLineBet(bet, choice):
+def moneyLineBet(bet, choice, b_type):
     # jake
-    
+    line = BETTING_INFO.at[b_type, 'Description']
+    print(1)
     pass
 
 
@@ -287,6 +288,7 @@ def makeBet(b_type, bet, choice):
             plusMinusBet(bet, choice)
         case 1:
             updateBettingInfo(b_type, bet, choice)
+            moneyLineBet(bet, choice, b_type)
         case 2:
             updateBettingInfo(b_type, bet, choice)
         case 3:
@@ -314,7 +316,6 @@ def makeBet(b_type, bet, choice):
 def main():
     # 10% vig taken
     vig = 0.1
-    # these are the plus_minus lines
     scores = predictScore(TEAM_1, TEAM_2)
     t_scores = {
         TEAM_1: int(scores[0]),
