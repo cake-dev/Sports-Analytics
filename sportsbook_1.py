@@ -218,8 +218,8 @@ def p_m_line(t_scores):
     return lines
 
 
-# make over under bet
-def overUnderBet(bet, choice):
+# make a plus minus bet
+def plusMinusBet(bet, choice):
     # jake
     pass
 
@@ -228,12 +228,15 @@ def overUnderBet(bet, choice):
 def moneyLineBet(bet, choice, b_type):
     # jake
     line = BETTING_INFO.at[b_type, 'Description']
-    print(1)
-    pass
+    if line[choice] < 0:
+        winnings = (100 / line[choice] * bet) * -1
+    else:
+        winnings = (line[choice] / 100 * bet)
+    BETTING_INFO.at[b_type, 'Possible Winnings'] = round(winnings, 2)
 
 
-# make a plus minus bet
-def plusMinusBet(bet, choice):
+# make over under bet
+def overUnderBet(bet, choice, b_type):
     # jake
     pass
 
@@ -291,6 +294,7 @@ def makeBet(b_type, bet, choice):
             moneyLineBet(bet, choice, b_type)
         case 2:
             updateBettingInfo(b_type, bet, choice)
+            overUnderBet(bet, choice, b_type)
         case 3:
             # set line here
             skilledProp1Bet(bet, choice)
