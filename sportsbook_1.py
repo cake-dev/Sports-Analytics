@@ -269,6 +269,15 @@ def usp1_line():
     chance = 8 / 80  # 8 overtime finals in 80 tournaments, 10% chance, 900 odds = 10%, -900 = 90% for no overtime
     line = 900
     BETTING_INFO.at[5, 'Description'] = line
+    
+    #games = getTourneyGames()
+    #for game in games:
+    #    if game.overtimes < 0:
+    #        ot += 1
+    #    else:
+    #        reg_finish += 1
+    #line = reg_finish/ot
+    #BETTING_INFO.at[5, 'Description'] = line
 
 def usp2_line():
     # K_team = Team("KANSAS")
@@ -282,6 +291,13 @@ def usp2_line():
     #
     # avg_fouls = ((total_foulsK / total_gamesK) + (total_foulsN / total_gamesN)) / 2
     BETTING_INFO.at[6, 'Description'] = 15#round(avg_fouls)
+    
+    #games = getTourneyGames()
+    #for game in games:
+    #    fpg += game.away_personal_fouls + game.home_personal_fouls
+    #    num_games += 1
+    #line = (fpg/num_games)/2
+    #BETTING_INFO.at[6, 'Description'] = line
 
 # make a plus minus bet
 def plusMinusBet(bet, choice, b_type):
@@ -335,6 +351,25 @@ def unskilledProp1Bet(bet, choice, b_type):
     else:
         winnings = ((100 / abs(line[choice])) * bet)
     BETTING_INFO.at[b_type, 'Possible Winnings'] = round(winnings, 2)
+    
+    #games = getTourneyGames()
+    #line = BETTING_INFO.at[5, 'Description']
+    #ot = False
+    #championship = Boxscores(datetime.today())
+    #if championship.overtimes > 0:
+    #    ot = True
+    #if ot:
+    #    if choice == 'yes':
+    #        winnings = (line * bet) / 100
+    #    else:
+    #        winnings = (100 * bet) / line
+    #else:
+    #    if choice == 'yes':
+    #        winnings = (100 * bet) / line
+    #    else:
+    #        winnings = (line * bet) / 100
+    #BETTING_INFO.at[b_type, 'Possible Winnings'] = winnings
+    
 
 
 # How many fouls will there be in the first half? (over/under avg fouls per game/2)
