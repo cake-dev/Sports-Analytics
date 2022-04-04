@@ -195,10 +195,12 @@ def predictScore(t1, t2):
     }
     return scores
 
+
 def o_u_line(scores):
     line = int(scores[TEAM_1] + scores[TEAM_2]) - 0.5
     BETTING_INFO.at[2, 'Description'] = line
     return line
+
 
 def m_line(pm_scores):
     t1_mod = TEAM_MODS[TEAM_1]
@@ -222,6 +224,7 @@ def m_line(pm_scores):
     BETTING_INFO.at[1, 'Description'] = m_lines
     return ml
 
+
 def p_m_line(t_scores):
     if t_scores.get(TEAM_1) > t_scores.get(TEAM_2):
         hi = t_scores.get(TEAM_1)
@@ -240,6 +243,7 @@ def p_m_line(t_scores):
     BETTING_INFO.at[0, 'Description'] = lines
     return lines
 
+
 def sp1_line():
     ochai_agbaji = Player('ochai-agbaji-1')
     player_data = ochai_agbaji.dataframe
@@ -250,54 +254,46 @@ def sp1_line():
     line = math.ceil(points_per_game)
     BETTING_INFO.at[3, 'Description'] = line
 
+
 def sp2_line():
-    K_team = Team("KANSAS")
-    N_team = Team("NORTH-CAROLINA")
-
-    total_gamesK = K_team.games_played
-    total_gamesN = N_team.games_played
-
-    total_turnoversK = K_team.turnovers
-    total_turnoversN = N_team.turnovers
-
-
-    avg_turnovers = ((total_turnoversK / total_gamesK) + (total_turnoversN / total_gamesN)) / 2
-    line = 12  # math.ceil(avg_turnovers)
-    BETTING_INFO.at[4, 'Description'] = line
-
-def usp1_line():
-    chance = 8 / 80  # 8 overtime finals in 80 tournaments, 10% chance, 900 odds = 10%, -900 = 90% for no overtime
-    line = 900
-    BETTING_INFO.at[5, 'Description'] = line
-    
-    #games = getTourneyGames()
-    #for game in games:
-    #    if game.overtimes < 0:
-    #        ot += 1
-    #    else:
-    #        reg_finish += 1
-    #line = reg_finish/ot
-    #BETTING_INFO.at[5, 'Description'] = line
-
-def usp2_line():
     # K_team = Team("KANSAS")
     # N_team = Team("NORTH-CAROLINA")
     #
     # total_gamesK = K_team.games_played
     # total_gamesN = N_team.games_played
     #
-    # total_foulsK = K_team.personal_fouls
-    # total_foulsN = N_team.personal_fouls
+    # total_turnoversK = K_team.turnovers
+    # total_turnoversN = N_team.turnovers
     #
-    # avg_fouls = ((total_foulsK / total_gamesK) + (total_foulsN / total_gamesN)) / 2
-    BETTING_INFO.at[6, 'Description'] = 15#round(avg_fouls)
-    
-    #games = getTourneyGames()
-    #for game in games:
-    #    fpg += game.away_personal_fouls + game.home_personal_fouls
-    #    num_games += 1
-    #line = (fpg/num_games)/2
-    #BETTING_INFO.at[6, 'Description'] = line
+    #
+    # avg_turnovers = ((total_turnoversK / total_gamesK) + (total_turnoversN / total_gamesN)) / 2
+    line = 12  # math.ceil(avg_turnovers)
+    BETTING_INFO.at[4, 'Description'] = line
+
+
+def usp1_line():
+    chance = 8 / 80  # 8 overtime finals in 80 tournaments, 10% chance, 900 odds = 10%, -900 = 90% for no overtime
+    line = 900
+    BETTING_INFO.at[5, 'Description'] = line
+
+    # games = getTourneyGames()
+    # for game in games:
+    #    if game.overtimes < 0:
+    #        ot += 1
+    #    else:
+    #        reg_finish += 1
+    # line = reg_finish/ot
+    # BETTING_INFO.at[5, 'Description'] = line
+
+
+def usp2_line():
+    # fouls = 0
+    # games = getTourneyGames()
+    # for game in games:
+    #     fouls += game.away_personal_fouls + game.home_personal_fouls
+    line = 16  # round((fouls / len(games)) / 2)
+    BETTING_INFO.at[6, 'Description'] = line
+
 
 # make a plus minus bet
 def plusMinusBet(bet, choice, b_type):
@@ -351,25 +347,24 @@ def unskilledProp1Bet(bet, choice, b_type):
     else:
         winnings = ((100 / abs(line[choice])) * bet)
     BETTING_INFO.at[b_type, 'Possible Winnings'] = round(winnings, 2)
-    
-    #games = getTourneyGames()
-    #line = BETTING_INFO.at[5, 'Description']
-    #ot = False
-    #championship = Boxscores(datetime.today())
-    #if championship.overtimes > 0:
+
+    # games = getTourneyGames()
+    # line = BETTING_INFO.at[5, 'Description']
+    # ot = False
+    # championship = Boxscores(datetime.today())
+    # if championship.overtimes > 0:
     #    ot = True
-    #if ot:
+    # if ot:
     #    if choice == 'yes':
     #        winnings = (line * bet) / 100
     #    else:
     #        winnings = (100 * bet) / line
-    #else:
+    # else:
     #    if choice == 'yes':
     #        winnings = (100 * bet) / line
     #    else:
     #        winnings = (line * bet) / 100
-    #BETTING_INFO.at[b_type, 'Possible Winnings'] = winnings
-    
+    # BETTING_INFO.at[b_type, 'Possible Winnings'] = winnings
 
 
 # How many fouls will there be in the first half? (over/under avg fouls per game/2)
@@ -455,9 +450,12 @@ def main():
                 money_line,
                 over_under,
                 "will Agbaji score over/under {} points? ({})".format(BETTING_INFO.at[3, 'Description'], "-110"),
-                "will there be over/under {} turnovers in the first half? ({})".format(BETTING_INFO.at[4, 'Description'], "-110"),
-                "will the game go to overtime? yes/no odds ({},{})".format(BETTING_INFO.at[5, 'Description'], -BETTING_INFO.at[5, 'Description']),
-                "will there be over/under {} fouls in the first half? ({})".format(BETTING_INFO.at[6, 'Description'], "-110"),
+                "will there be over/under {} turnovers in the first half? ({})".format(
+                    BETTING_INFO.at[4, 'Description'], "-110"),
+                "will the game go to overtime? yes/no odds ({},{})".format(BETTING_INFO.at[5, 'Description'],
+                                                                           -BETTING_INFO.at[5, 'Description']),
+                "will there be over/under {} fouls in the first half? ({})".format(BETTING_INFO.at[6, 'Description'],
+                                                                                   "-110"),
                 "",
                 "",
             ]
@@ -468,6 +466,8 @@ def main():
         print(display_df)
         print('Please select your bet (#) (-1 to quit):')
         user_bet_type = int(input())
+        if user_bet_type == -1:
+            break
         print('Please enter amount (ex. $500 would be entered as 500)')
         user_bet_amount = int(input())
         if user_bet_type == 0 or user_bet_type == 1:
