@@ -338,9 +338,11 @@ def unskilledProp1Bet(bet, choice, b_type):
 
 
 # How many fouls will there be in the first half? (over/under avg fouls per game/2)
-def unskilledProp2Bet(bet, choice):
+def unskilledProp2Bet(bet, choice, b_type):
     # myles
-    pass
+    winnings = 0.9 * bet
+    BETTING_INFO.at[b_type, 'Possible Winnings'] = round(winnings, 2)
+    BETTING_INFO.at[b_type, 'Sportsbook Cut'] = bet * 0.1
 
 
 # makes an exotic prop 1 bet
@@ -381,7 +383,8 @@ def makeBet(b_type, bet, choice):
             updateBettingInfo(b_type, bet, choice)
             unskilledProp1Bet(bet, choice, b_type)
         case 6:
-            unskilledProp2Bet(bet, choice)
+            updateBettingInfo(b_type, bet, choice)
+            unskilledProp2Bet(bet, choice, b_type)
         case 7:
             exoticProp1Bet(bet, choice)
         case 8:
@@ -419,7 +422,7 @@ def main():
                 "will Agbaji score over/under {} points? ({})".format(BETTING_INFO.at[3, 'Description'], "-110"),
                 "will there be over/under {} turnovers in the first half? ({})".format(BETTING_INFO.at[4, 'Description'], "-110"),
                 "will the game go to overtime? yes/no odds ({},{})".format(BETTING_INFO.at[5, 'Description'], -BETTING_INFO.at[5, 'Description']),
-                "will there be over/under {} fouls in the first half?".format(BETTING_INFO.at[6, 'Description']),
+                "will there be over/under {} fouls in the first half? ({})".format(BETTING_INFO.at[6, 'Description'], "-110"),
                 "",
                 "",
             ]
