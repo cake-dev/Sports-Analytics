@@ -298,13 +298,17 @@ def overUnderBet(bet, choice, b_type):
 
 
 #  Will (top scoring player) score more than (average + 1)?
-def skilledProp1Bet(bet, choice):
-    pass
+def skilledProp1Bet(bet, choice, b_type):
+    winnings = 0.9 * bet
+    BETTING_INFO.at[b_type, 'Possible Winnings'] = round(winnings, 2)
+    BETTING_INFO.at[b_type, 'Sportsbook Cut'] = bet * 0.1
 
 
 # Will there be > (avg) turnovers?
 def skilledProp2Bet(bet, choice, b_type):
-    pass
+    winnings = 0.9 * bet
+    BETTING_INFO.at[b_type, 'Possible Winnings'] = round(winnings, 2)
+    BETTING_INFO.at[b_type, 'Sportsbook Cut'] = bet * 0.1
 
 
 # Will the game go to overtime? (chance determined by history of overtime games in NCAA tourney)
@@ -349,30 +353,24 @@ def makeBet(b_type, bet, choice):
             updateBettingInfo(b_type, bet, choice)
             overUnderBet(bet, choice, b_type)
         case 3:
-            # set line here
-            skilledProp1Bet(bet, choice)
+            updateBettingInfo(b_type, bet, choice)
+            skilledProp1Bet(bet, choice, b_type)
         case 4:
-            # set line here
+            updateBettingInfo(b_type, bet, choice)
             skilledProp2Bet(bet, choice, b_type)
         case 5:
-            # set line here
             unskilledProp1Bet(bet, choice)
         case 6:
-            # set line here
             unskilledProp2Bet(bet, choice)
         case 7:
-            # set line here
             exoticProp1Bet(bet, choice)
         case 8:
-            # set line here
             exoticProp2Bet(bet, choice)
         case _:
             print("No bet selected")
 
 
 def main():
-    # 10% vig taken
-    vig = 0.1
     scores = predictScore(TEAM_1, TEAM_2)
     plus_minus = pd.Series(p_m_line(scores)).to_string().strip() + '(-110)'
     over_under = "over {} (-110)".format(o_u_line(scores))
@@ -398,8 +396,8 @@ def main():
                 plus_minus,
                 money_line,
                 over_under,
-                "will Agbaji score more than {} points?".format(s1_line),
-                "will there be more than {} turnovers?".format(s2_line),
+                "will Agbaji score over/under {} points? ({})".format(s1_line, "-110"),
+                "will there be over/under {} turnovers? ({})".format(s2_line, "-110"),
                 "",
                 "",
                 "",
@@ -414,7 +412,7 @@ def main():
         user_bet_type = int(input())
         print('Please enter amount (ex. $500 would be entered as 500)')
         user_bet_amount = int(input())
-        if user_bet_type == 2:
+        if user_bet_type == 2 or user_bet_type == 3 or user_bet_type == 4:
             print("Over or under?")
             user_choice = str(input())
         else:
