@@ -5,6 +5,7 @@ Date: 03/30/22
 """
 from datetime import datetime
 
+import math
 import numpy
 import pandas as pd
 from sportsipy.ncaab.teams import Team
@@ -270,13 +271,29 @@ def overUnderBet(bet, choice, b_type):
 
 #  Will (top scoring player) score more than (average + 1)?
 def skilledProp1Bet(bet, choice):
-    # nick
+    ochai_agbaji = Player('ochai-agbaji-1')
+    player_data = ochai_agbaji.dataframe
+
+    total_points = test.points['2021-22']
+    total_games = test.games_played['2021-22']
+    points_per_game = total_points/total_games
+    line = math.ceil(points_per_game)
     pass
 
 
 # Will there be > (avg) turnovers?
 def skilledProp2Bet(bet, choice):
-    # nick
+    K_team = Team("KANSAS")
+    N_team = Team("NORTH-CAROLINA")
+
+    total_gamesK = K_team.games_played
+    total_gamesN = N_team.games_played
+
+    total_turnoversK = K_team.turnovers
+    total_turnoversN = N_team.turnovers
+
+    avg_turnovers = ((total_turnoversK/total_gamesK) + (total_turnoversN/total_gamesN)) / 2
+    line = math.ceil(avg_turnovers)
     pass
 
 
