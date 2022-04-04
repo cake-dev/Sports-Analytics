@@ -12,6 +12,7 @@ from sportsipy.ncaab.boxscore import Boxscore
 from sportsipy.ncaab.boxscore import Boxscores
 
 pd.set_option("display.max_rows", None, "display.max_columns", None)
+pd.options.display.max_colwidth = 200
 
 TEAM_1 = 'NORTH-CAROLINA'
 TEAM_2 = 'KANSAS'
@@ -70,19 +71,17 @@ def updateBettingInfo(bet_type, bet, choice):
     BETTING_INFO.at[bet_type, 'Choice'] = choice
 
 
-def getGamesInRange():
+def getTourneyGames():
     # Pulls all games between and including March 15, 2022 to April 3, 2022
-    games = Boxscores(datetime(2022, 3, 15), datetime(2022, 4, 3))
-    dates = ['3-15-2022', '3-16-2022', '3-17-2022', '3-18-2022', '3-19-2022', '3-20-2022', '3-21-2022', '3-22-2022', '3-23-2022', '3-24-2022', '3-25-2022', '3-26-2022', '3-27-2022', '3-28-2022', '3-29-2022', '3-30-2022', '3-31-2022', '4-1-2022', '4-2-2022', '4-3-2022', ]
+    games = Boxscores(datetime(2022, 3, 17), datetime(2022, 4, 3))
+    dates = ['3-17-2022', '3-18-2022', '3-19-2022', '3-20-2022', '3-21-2022', '3-22-2022', '3-23-2022', '3-24-2022', '3-25-2022', '3-26-2022', '3-27-2022', '3-28-2022', '3-29-2022', '3-30-2022', '3-31-2022', '4-1-2022', '4-2-2022', '4-3-2022', ]
     game_data = []
     for date in dates:
         for game in games.games[date]:
-            g_box = Boxscore(game['boxscore'])
-            print(g_box.home_turnovers + g_box.away_turnovers)
-            if g_box.home_turnovers + g_box.away_turnovers == 22:
-                print('here')
-            game_data.append(g_box)
-    print(game_data)
+            if game['top_25']:
+                g_box = Boxscore(game['boxscore'])
+                game_data.append(g_box)
+    return game_data
 
 
 # returns the values of predicted scores for each team, can be used for plusMinus, moneyLine (for predicted winner), as well as combined for overUnder bet
@@ -336,14 +335,13 @@ def makeBet(b_type, bet, choice):
 def main():
     # 10% vig taken
     vig = 0.1
-    getGamesInRange()
     scores = predictScore(TEAM_1, TEAM_2)
     t_scores = {
         TEAM_1: int(scores[0]),
         TEAM_2: int(scores[1])
     }
-    plus_minus = pd.Series(p_m_line(t_scores)).to_string().strip()
-    over_under = "under {}".format(o_u_line(scores))
+    plus_minus = pd.Series(p_m_line(t_scores)).to_string().strip() + '(-110)'
+    over_under = "under {} (-110)".format(o_u_line(scores))
     money_line = m_line(p_m_line(t_scores))
     display_df = pd.DataFrame(
         {
