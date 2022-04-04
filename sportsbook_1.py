@@ -195,12 +195,10 @@ def predictScore(t1, t2):
     }
     return scores
 
-
 def o_u_line(scores):
     line = int(scores[TEAM_1] + scores[TEAM_2]) - 0.5
     BETTING_INFO.at[2, 'Description'] = line
     return line
-
 
 def m_line(pm_scores):
     t1_mod = TEAM_MODS[TEAM_1]
@@ -224,7 +222,6 @@ def m_line(pm_scores):
     BETTING_INFO.at[1, 'Description'] = m_lines
     return ml
 
-
 def p_m_line(t_scores):
     if t_scores.get(TEAM_1) > t_scores.get(TEAM_2):
         hi = t_scores.get(TEAM_1)
@@ -243,7 +240,6 @@ def p_m_line(t_scores):
     BETTING_INFO.at[0, 'Description'] = lines
     return lines
 
-
 def sp1_line():
     ochai_agbaji = Player('ochai-agbaji-1')
     player_data = ochai_agbaji.dataframe
@@ -255,19 +251,37 @@ def sp1_line():
     BETTING_INFO.at[3, 'Description'] = line
 
 def sp2_line():
+    K_team = Team("KANSAS")
+    N_team = Team("NORTH-CAROLINA")
+
+    total_gamesK = K_team.games_played
+    total_gamesN = N_team.games_played
+
+    total_turnoversK = K_team.turnovers
+    total_turnoversN = N_team.turnovers
+
+
+    avg_turnovers = ((total_turnoversK / total_gamesK) + (total_turnoversN / total_gamesN)) / 2
+    line = 12  # math.ceil(avg_turnovers)
+    BETTING_INFO.at[4, 'Description'] = line
+
+def usp1_line():
+    chance = 8 / 80  # 8 overtime finals in 80 tournaments, 10% chance, 900 odds = 10%, -900 = 90% for no overtime
+    line = 900
+    BETTING_INFO.at[5, 'Description'] = line
+
+def usp2_line():
     # K_team = Team("KANSAS")
     # N_team = Team("NORTH-CAROLINA")
     #
     # total_gamesK = K_team.games_played
     # total_gamesN = N_team.games_played
     #
-    # total_turnoversK = K_team.turnovers
-    # total_turnoversN = N_team.turnovers
+    # total_foulsK = K_team.personal_fouls
+    # total_foulsN = N_team.personal_fouls
     #
-    # avg_turnovers = ((total_turnoversK / total_gamesK) + (total_turnoversN / total_gamesN)) / 2
-    line = 12#math.ceil(avg_turnovers)
-    BETTING_INFO.at[4, 'Description'] = line
-
+    # avg_fouls = ((total_foulsK / total_gamesK) + (total_foulsN / total_gamesN)) / 2
+    BETTING_INFO.at[6, 'Description'] = 15#round(avg_fouls)
 
 # make a plus minus bet
 def plusMinusBet(bet, choice, b_type):
@@ -297,7 +311,7 @@ def overUnderBet(bet, choice, b_type):
     BETTING_INFO.at[b_type, 'Sportsbook Cut'] = bet * 0.1
 
 
-#  Will (top scoring player) score more than (average + 1)?
+#  Will (top scoring player) score more than (average)?
 def skilledProp1Bet(bet, choice, b_type):
     winnings = 0.9 * bet
     BETTING_INFO.at[b_type, 'Possible Winnings'] = round(winnings, 2)
@@ -313,9 +327,14 @@ def skilledProp2Bet(bet, choice, b_type):
 
 # Will the game go to overtime? (chance determined by history of overtime games in NCAA tourney)
 # take each NCAA finals game (by date, using Boxscore), check if it went to overtime, create line based on ratio
-def unskilledProp1Bet(bet, choice):
+def unskilledProp1Bet(bet, choice, b_type):
     # myles
-    pass
+    line = BETTING_INFO.at[b_type, 'Description']
+    if choice == 'yes':
+        winnings = ((abs(line) / 100) * bet)
+    else:
+        winnings = ((100 / abs(line[choice])) * bet)
+    BETTING_INFO.at[b_type, 'Possible Winnings'] = round(winnings, 2)
 
 
 # How many fouls will there be in the first half? (over/under avg fouls per game/2)
@@ -359,7 +378,8 @@ def makeBet(b_type, bet, choice):
             updateBettingInfo(b_type, bet, choice)
             skilledProp2Bet(bet, choice, b_type)
         case 5:
-            unskilledProp1Bet(bet, choice)
+            updateBettingInfo(b_type, bet, choice)
+            unskilledProp1Bet(bet, choice, b_type)
         case 6:
             unskilledProp2Bet(bet, choice)
         case 7:
@@ -377,8 +397,8 @@ def main():
     money_line = m_line(p_m_line(scores))
     sp1_line()
     sp2_line()
-    s1_line = BETTING_INFO.at[3, 'Description']
-    s2_line = BETTING_INFO.at[4, 'Description']
+    usp1_line()
+    usp2_line()
     display_df = pd.DataFrame(
         {
             "Bet Type": [
@@ -396,10 +416,10 @@ def main():
                 plus_minus,
                 money_line,
                 over_under,
-                "will Agbaji score over/under {} points? ({})".format(s1_line, "-110"),
-                "will there be over/under {} turnovers? ({})".format(s2_line, "-110"),
-                "",
-                "",
+                "will Agbaji score over/under {} points? ({})".format(BETTING_INFO.at[3, 'Description'], "-110"),
+                "will there be over/under {} turnovers in the first half? ({})".format(BETTING_INFO.at[4, 'Description'], "-110"),
+                "will the game go to overtime? yes/no odds ({},{})".format(BETTING_INFO.at[5, 'Description'], -BETTING_INFO.at[5, 'Description']),
+                "will there be over/under {} fouls in the first half?".format(BETTING_INFO.at[6, 'Description']),
                 "",
                 "",
             ]
@@ -412,11 +432,14 @@ def main():
         user_bet_type = int(input())
         print('Please enter amount (ex. $500 would be entered as 500)')
         user_bet_amount = int(input())
-        if user_bet_type == 2 or user_bet_type == 3 or user_bet_type == 4:
+        if user_bet_type == 0 or user_bet_type == 1:
+            print('Please enter the team: {} or {}'.format(TEAM_1, TEAM_2))
+            user_choice = str(input())
+        if user_bet_type == 2 or user_bet_type == 3 or user_bet_type == 4 or user_bet_type == 6:
             print("Over or under?")
             user_choice = str(input())
-        else:
-            print('Please enter the team: {} or {}'.format(TEAM_1, TEAM_2))
+        if user_bet_type == 5:
+            print("yes or no?")
             user_choice = str(input())
         makeBet(user_bet_type, user_bet_amount, user_choice)
         BETTING_INFO.to_csv('Data/betting_info.csv')
