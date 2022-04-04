@@ -31,19 +31,17 @@ GET_MODS = False
 if GET_MODS:
     TEAM_MODS = pd.DataFrame(
         {
-            'TEAM': ['DUKE', 'KANSAS', 'NORTH-CAROLINA', 'VILLANOVA'],
-            'MOD': [Team('DUKE').strength_of_schedule, Team('KANSAS').strength_of_schedule,
-                    Team('NORTH-CAROLINA').strength_of_schedule, Team('VILLANOVA').strength_of_schedule, ]
+            'TEAM': ['KANSAS', 'NORTH-CAROLINA'],
+            'MOD': [Team('KANSAS').strength_of_schedule,
+                    Team('NORTH-CAROLINA').strength_of_schedule]
         }
     )
 
     TEAM_MODS.to_csv('Data/team_mods.csv')
 else:
     TEAM_MODS = {
-        'DUKE': 7.04,
-        'KANSAS': 10.98,
-        'NORTH-CAROLINA': 8.25,
-        'VILLANOVA': 10.01
+        'KANSAS': 11.21,
+        'NORTH-CAROLINA': 8.53
     }
 
 # use this DF to add betting info to write to CSV later
