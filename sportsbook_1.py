@@ -14,8 +14,8 @@ from sportsipy.ncaab.boxscore import Boxscores
 pd.set_option("display.max_rows", None, "display.max_columns", None)
 pd.options.display.max_colwidth = 200
 
-TEAM_1 = 'NORTH-CAROLINA'
-TEAM_2 = 'KANSAS'
+TEAM_1 = 'KANSAS'
+TEAM_2 = 'NORTH-CAROLINA'
 
 # change these to the winning teams after the game, will be used to check against user choice to give out winnings
 WINNER = TEAM_1
@@ -61,7 +61,8 @@ BETTING_INFO = pd.DataFrame(
         "Bet Amount": [0, 0, 0, 0, 0, 0, 0, 0, 0],
         "Choice": [TEAM_1, TEAM_1, TEAM_1, TEAM_1, TEAM_1, TEAM_1, TEAM_1, TEAM_1, TEAM_1],
         "Possible Winnings": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "Description": ["FIXME", "FIXME", "FIXME", "FIXME", "FIXME", "FIXME", "FIXME", "FIXME", "FIXME"]
+        "Description": ["FIXME", "FIXME", "FIXME", "FIXME", "FIXME", "FIXME", "FIXME", "FIXME", "FIXME"],
+        "Sportsbook Cut": [0, 0, 0, 0, 0, 0, 0, 0, 0]
     }
 )
 
@@ -72,9 +73,11 @@ def updateBettingInfo(bet_type, bet, choice):
 
 
 def getTourneyGames():
-    # Pulls all games between and including March 15, 2022 to April 3, 2022
+    # Pulls all games between and including March 17, 2022 to April 3, 2022
     games = Boxscores(datetime(2022, 3, 17), datetime(2022, 4, 3))
-    dates = ['3-17-2022', '3-18-2022', '3-19-2022', '3-20-2022', '3-21-2022', '3-22-2022', '3-23-2022', '3-24-2022', '3-25-2022', '3-26-2022', '3-27-2022', '3-28-2022', '3-29-2022', '3-30-2022', '3-31-2022', '4-1-2022', '4-2-2022', '4-3-2022', ]
+    dates = ['3-17-2022', '3-18-2022', '3-19-2022', '3-20-2022', '3-21-2022', '3-22-2022', '3-23-2022', '3-24-2022',
+             '3-25-2022', '3-26-2022', '3-27-2022', '3-28-2022', '3-29-2022', '3-30-2022', '3-31-2022', '4-1-2022',
+             '4-2-2022', '4-3-2022', ]
     game_data = []
     for date in dates:
         for game in games.games[date]:
@@ -182,11 +185,15 @@ def predictScore(t1, t2):
     adj_off_t2 = (adj_off_1_t2 + adj_off_2_t2) / 2
     t1_score = (adj_off_t1 / 100) * adj_poss
     t2_score = (adj_off_t2 / 100) * adj_poss
-    return [t1_score, t2_score]
+    scores = {
+        TEAM_1: t1_score,
+        TEAM_2: t2_score
+    }
+    return scores
 
 
 def o_u_line(scores):
-    line = int(scores[0] + scores[1]) - 0.5
+    line = int(scores[TEAM_1] + scores[TEAM_2]) - 0.5
     BETTING_INFO.at[2, 'Description'] = line
     return line
 
@@ -226,16 +233,19 @@ def p_m_line(t_scores):
         winner = TEAM_2
         loser = TEAM_1
     lines = {
-        winner: (lo - hi) - 0.5,
-        loser: (hi - lo) + 0.5
+        winner: round((lo - hi) - 0.5, 1),
+        loser: round((hi - lo) + 0.5, 1)
     }
     BETTING_INFO.at[0, 'Description'] = lines
     return lines
 
 
 # make a plus minus bet
-def plusMinusBet(bet, choice):
-    # jake
+def plusMinusBet(bet, choice, b_type):
+    winnings = 100 / 110 * bet
+    line = BETTING_INFO.at[b_type, 'Description']
+    BETTING_INFO.at[b_type, 'Possible Winnings'] = winnings
+    BETTING_INFO.at[b_type, 'Sportsbook Cut'] = bet * 0.1
     pass
 
 
@@ -247,13 +257,17 @@ def moneyLineBet(bet, choice, b_type):
         winnings = ((100 / abs(line[choice])) * bet)
     else:
         winnings = ((abs(line[choice]) / 100) * bet)
+    winnings = winnings * 0.9
     BETTING_INFO.at[b_type, 'Possible Winnings'] = round(winnings, 2)
+    BETTING_INFO.at[b_type, 'Sportsbook Cut'] = bet * 0.1
 
 
 # make over under bet
 def overUnderBet(bet, choice, b_type):
-    # jake
-    pass
+    winnings = 100/110 * bet
+    line = BETTING_INFO.at[b_type, 'Description']
+    BETTING_INFO.at[b_type, 'Possible Winnings'] = winnings
+    BETTING_INFO.at[b_type, 'Sportsbook Cut'] = bet * 0.1
 
 
 #  Will (top scoring player) score more than (average + 1)?
@@ -282,7 +296,7 @@ def unskilledProp2Bet(bet, choice):
 
 
 # makes an exotic prop 1 bet
-# which team will score first?
+# will it rain on gameday? (night)
 def exoticProp1Bet(bet, choice):
     pass
 
@@ -293,17 +307,11 @@ def exoticProp2Bet(bet, choice):
     pass
 
 
-# outputs the betting info in sportsbook format
-# use the BETTING_INFO df to do this
-def displayData():
-    pass
-
-
 def makeBet(b_type, bet, choice):
     match b_type:
         case 0:
             updateBettingInfo(b_type, bet, choice)
-            plusMinusBet(bet, choice)
+            plusMinusBet(bet, choice, b_type)
         case 1:
             updateBettingInfo(b_type, bet, choice)
             moneyLineBet(bet, choice, b_type)
@@ -336,13 +344,9 @@ def main():
     # 10% vig taken
     vig = 0.1
     scores = predictScore(TEAM_1, TEAM_2)
-    t_scores = {
-        TEAM_1: int(scores[0]),
-        TEAM_2: int(scores[1])
-    }
-    plus_minus = pd.Series(p_m_line(t_scores)).to_string().strip() + '(-110)'
+    plus_minus = pd.Series(p_m_line(scores)).to_string().strip() + '(-110)'
     over_under = "under {} (-110)".format(o_u_line(scores))
-    money_line = m_line(p_m_line(t_scores))
+    money_line = m_line(p_m_line(scores))
     display_df = pd.DataFrame(
         {
             "Bet Type": [
