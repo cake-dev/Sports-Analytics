@@ -242,9 +242,9 @@ def p_m_line(t_scores):
 
 # make a plus minus bet
 def plusMinusBet(bet, choice, b_type):
-    winnings = 100 / 110 * bet
+    winnings = 0.9 * bet
     line = BETTING_INFO.at[b_type, 'Description']
-    BETTING_INFO.at[b_type, 'Possible Winnings'] = winnings
+    BETTING_INFO.at[b_type, 'Possible Winnings'] = round(winnings, 2)
     BETTING_INFO.at[b_type, 'Sportsbook Cut'] = bet * 0.1
     pass
 
@@ -257,16 +257,14 @@ def moneyLineBet(bet, choice, b_type):
         winnings = ((100 / abs(line[choice])) * bet)
     else:
         winnings = ((abs(line[choice]) / 100) * bet)
-    winnings = winnings * 0.9
     BETTING_INFO.at[b_type, 'Possible Winnings'] = round(winnings, 2)
-    BETTING_INFO.at[b_type, 'Sportsbook Cut'] = bet * 0.1
 
 
 # make over under bet
 def overUnderBet(bet, choice, b_type):
-    winnings = 100/110 * bet
+    winnings = 0.9 * bet
     line = BETTING_INFO.at[b_type, 'Description']
-    BETTING_INFO.at[b_type, 'Possible Winnings'] = winnings
+    BETTING_INFO.at[b_type, 'Possible Winnings'] = round(winnings, 2)
     BETTING_INFO.at[b_type, 'Sportsbook Cut'] = bet * 0.1
 
 
@@ -304,6 +302,11 @@ def exoticProp1Bet(bet, choice):
 # makes an exotic prop 1 bet
 # will the final combined score be odd or even?
 def exoticProp2Bet(bet, choice):
+    pass
+
+
+# import betting info csv and check if each choice is winner or not, keep winnings if winner/choice is correct, else reset winnings cell before saving csv
+def payoutBets():
     pass
 
 
