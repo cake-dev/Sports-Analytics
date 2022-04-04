@@ -8,6 +8,8 @@ from datetime import datetime
 import math
 import numpy
 import pandas as pd
+from numpy import test
+from sportsipy.ncaab.roster import Player
 from sportsipy.ncaab.teams import Team
 from sportsipy.ncaab.boxscore import Boxscore
 from sportsipy.ncaab.boxscore import Boxscores
@@ -67,6 +69,7 @@ BETTING_INFO = pd.DataFrame(
     }
 )
 
+BETTING_INFO.to_csv('Data/betting_info.csv')
 
 def updateBettingInfo(bet_type, bet, choice):
     BETTING_INFO.at[bet_type, 'Bet Amount'] = bet
@@ -278,7 +281,6 @@ def skilledProp1Bet(bet, choice):
     total_games = test.games_played['2021-22']
     points_per_game = total_points/total_games
     line = math.ceil(points_per_game)
-    pass
 
 
 # Will there be > (avg) turnovers?
@@ -294,7 +296,6 @@ def skilledProp2Bet(bet, choice):
 
     avg_turnovers = ((total_turnoversK/total_gamesK) + (total_turnoversN/total_gamesN)) / 2
     line = math.ceil(avg_turnovers)
-    pass
 
 
 # Will the game go to overtime? (chance determined by history of overtime games in NCAA tourney)
@@ -365,7 +366,7 @@ def main():
     vig = 0.1
     scores = predictScore(TEAM_1, TEAM_2)
     plus_minus = pd.Series(p_m_line(scores)).to_string().strip() + '(-110)'
-    over_under = "under {} (-110)".format(o_u_line(scores))
+    over_under = "over {} (-110)".format(o_u_line(scores))
     money_line = m_line(p_m_line(scores))
     display_df = pd.DataFrame(
         {
@@ -407,6 +408,7 @@ def main():
             print('Please enter the team: {} or {}'.format(TEAM_1, TEAM_2))
             user_choice = str(input())
         makeBet(user_bet_type, user_bet_amount, user_choice)
+        BETTING_INFO.to_csv('Data/betting_info.csv')
         print(BETTING_INFO)
 
 
