@@ -61,7 +61,7 @@ BETTING_INFO = pd.DataFrame(
             "exotic prop 2"
         ],
         "Bet Amount": [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "Choice": [TEAM_1, TEAM_1, TEAM_1, TEAM_1, TEAM_1, TEAM_1, TEAM_1, TEAM_1, TEAM_1],
+        "Choice": ["TEAM", "TEAM", "TEAM", "TEAM", "TEAM", "TEAM", "TEAM", "TEAM", "TEAM"],
         "Possible Winnings": [0, 0, 0, 0, 0, 0, 0, 0, 0],
         "Description": ["FIXME", "FIXME", "FIXME", "FIXME", "FIXME", "FIXME", "FIXME", "FIXME", "FIXME"],
         "Sportsbook Cut": [0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -295,6 +295,10 @@ def usp2_line():
     BETTING_INFO.at[6, 'Description'] = line
 
 
+def ex2_line():
+    pass
+
+
 # make a plus minus bet
 def plusMinusBet(bet, choice, b_type):
     winnings = 0.9 * bet
@@ -345,7 +349,7 @@ def unskilledProp1Bet(bet, choice, b_type):
     if choice == 'yes':
         winnings = ((abs(line) / 100) * bet)
     else:
-        winnings = ((100 / abs(line[choice])) * bet)
+        winnings = ((100 / abs(line)) * bet)
     BETTING_INFO.at[b_type, 'Possible Winnings'] = round(winnings, 2)
 
     # games = getTourneyGames()
@@ -377,13 +381,16 @@ def unskilledProp2Bet(bet, choice, b_type):
 
 # makes an exotic prop 1 bet
 # will it rain on gameday? (night)
-def exoticProp1Bet(bet, choice):
+def exoticProp1Bet(bet, choice, b_type):
     pass
 
 
 # makes an exotic prop 1 bet
 # will the final combined score be odd or even?
-def exoticProp2Bet(bet, choice):
+def exoticProp2Bet(bet, choice, b_type):
+    winnings = 0.9 * bet
+    BETTING_INFO.at[b_type, 'Possible Winnings'] = round(winnings, 2)
+    BETTING_INFO.at[b_type, 'Sportsbook Cut'] = bet * 0.1
     pass
 
 
@@ -416,11 +423,20 @@ def makeBet(b_type, bet, choice):
             updateBettingInfo(b_type, bet, choice)
             unskilledProp2Bet(bet, choice, b_type)
         case 7:
-            exoticProp1Bet(bet, choice)
+            exoticProp1Bet(bet, choice, b_type)
         case 8:
-            exoticProp2Bet(bet, choice)
+            updateBettingInfo(b_type, bet, choice)
+            exoticProp2Bet(bet, choice, b_type)
         case _:
             print("No bet selected")
+
+
+def generateLines():
+    sp1_line()
+    sp2_line()
+    usp1_line()
+    usp2_line()
+    ex2_line()
 
 
 def main():
@@ -428,10 +444,7 @@ def main():
     plus_minus = pd.Series(p_m_line(scores)).to_string().strip() + '(-110)'
     over_under = "over {} (-110)".format(o_u_line(scores))
     money_line = m_line(p_m_line(scores))
-    sp1_line()
-    sp2_line()
-    usp1_line()
-    usp2_line()
+    generateLines()
     display_df = pd.DataFrame(
         {
             "Bet Type": [
@@ -457,7 +470,7 @@ def main():
                 "will there be over/under {} fouls in the first half? ({})".format(BETTING_INFO.at[6, 'Description'],
                                                                                    "-110"),
                 "",
-                "",
+                "will the final combined score be odd or even? (odd/even) (-110)",
             ]
         }
     )
@@ -478,6 +491,9 @@ def main():
             user_choice = str(input())
         if user_bet_type == 5:
             print("yes or no?")
+            user_choice = str(input())
+        if user_bet_type == 8:
+            print("odd or even?")
             user_choice = str(input())
         makeBet(user_bet_type, user_bet_amount, user_choice)
         BETTING_INFO.to_csv('Data/betting_info.csv')
