@@ -8,7 +8,6 @@ from datetime import datetime
 import math
 import numpy
 import pandas as pd
-from numpy import test
 from sportsipy.ncaab.roster import Player
 from sportsipy.ncaab.teams import Team
 from sportsipy.ncaab.boxscore import Boxscore
@@ -70,6 +69,7 @@ BETTING_INFO = pd.DataFrame(
 )
 
 BETTING_INFO.to_csv('Data/betting_info.csv')
+
 
 def updateBettingInfo(bet_type, bet, choice):
     BETTING_INFO.at[bet_type, 'Bet Amount'] = bet
@@ -244,6 +244,31 @@ def p_m_line(t_scores):
     return lines
 
 
+def sp1_line():
+    ochai_agbaji = Player('ochai-agbaji-1')
+    player_data = ochai_agbaji.dataframe
+
+    total_points = player_data.points['2021-22']
+    total_games = player_data.games_played['2021-22']
+    points_per_game = total_points / total_games
+    line = math.ceil(points_per_game)
+    BETTING_INFO.at[3, 'Description'] = line
+
+def sp2_line():
+    # K_team = Team("KANSAS")
+    # N_team = Team("NORTH-CAROLINA")
+    #
+    # total_gamesK = K_team.games_played
+    # total_gamesN = N_team.games_played
+    #
+    # total_turnoversK = K_team.turnovers
+    # total_turnoversN = N_team.turnovers
+    #
+    # avg_turnovers = ((total_turnoversK / total_gamesK) + (total_turnoversN / total_gamesN)) / 2
+    line = 12#math.ceil(avg_turnovers)
+    BETTING_INFO.at[4, 'Description'] = line
+
+
 # make a plus minus bet
 def plusMinusBet(bet, choice, b_type):
     winnings = 0.9 * bet
@@ -274,28 +299,12 @@ def overUnderBet(bet, choice, b_type):
 
 #  Will (top scoring player) score more than (average + 1)?
 def skilledProp1Bet(bet, choice):
-    ochai_agbaji = Player('ochai-agbaji-1')
-    player_data = ochai_agbaji.dataframe
-
-    total_points = test.points['2021-22']
-    total_games = test.games_played['2021-22']
-    points_per_game = total_points/total_games
-    line = math.ceil(points_per_game)
+    pass
 
 
 # Will there be > (avg) turnovers?
-def skilledProp2Bet(bet, choice):
-    K_team = Team("KANSAS")
-    N_team = Team("NORTH-CAROLINA")
-
-    total_gamesK = K_team.games_played
-    total_gamesN = N_team.games_played
-
-    total_turnoversK = K_team.turnovers
-    total_turnoversN = N_team.turnovers
-
-    avg_turnovers = ((total_turnoversK/total_gamesK) + (total_turnoversN/total_gamesN)) / 2
-    line = math.ceil(avg_turnovers)
+def skilledProp2Bet(bet, choice, b_type):
+    pass
 
 
 # Will the game go to overtime? (chance determined by history of overtime games in NCAA tourney)
@@ -344,7 +353,7 @@ def makeBet(b_type, bet, choice):
             skilledProp1Bet(bet, choice)
         case 4:
             # set line here
-            skilledProp2Bet(bet, choice)
+            skilledProp2Bet(bet, choice, b_type)
         case 5:
             # set line here
             unskilledProp1Bet(bet, choice)
@@ -368,6 +377,10 @@ def main():
     plus_minus = pd.Series(p_m_line(scores)).to_string().strip() + '(-110)'
     over_under = "over {} (-110)".format(o_u_line(scores))
     money_line = m_line(p_m_line(scores))
+    sp1_line()
+    sp2_line()
+    s1_line = BETTING_INFO.at[3, 'Description']
+    s2_line = BETTING_INFO.at[4, 'Description']
     display_df = pd.DataFrame(
         {
             "Bet Type": [
@@ -385,8 +398,8 @@ def main():
                 plus_minus,
                 money_line,
                 over_under,
-                "",
-                "",
+                "will Agbaji score more than {} points?".format(s1_line),
+                "will there be more than {} turnovers?".format(s2_line),
                 "",
                 "",
                 "",
